@@ -484,9 +484,53 @@
         </div>
       </div>
     </div>
+    
+      <!-- Logout Confirmation Modal -->
+      <div id="logoutConfirmModal" class="fixed inset-0 bg-black/70 z-[75] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-slide-in flex flex-col">
+          <div class="gradient-card p-5 border-b flex justify-between items-center">
+            <h3 class="text-white font-bold">Confirm Logout</h3>
+            <button onclick="closeLogoutConfirm()" class="text-white text-xl hover:text-red-200"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="p-6">
+            <p class="text-sm text-gray-700">Are you sure you want to log out? You will need to sign in again to access your documents.</p>
+            <div class="mt-6 flex justify-end gap-3">
+              <button onclick="closeLogoutConfirm()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancel</button>
+              <button id="confirmLogoutBtn" onclick="confirmLogout()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg">Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
     <script>
       // 1. Live Stats
+      
+      // Logout confirmation handlers
+      function openLogoutConfirm() {
+        const m = document.getElementById('logoutConfirmModal');
+        if (!m) return;
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+      }
+      function closeLogoutConfirm() {
+        const m = document.getElementById('logoutConfirmModal');
+        if (!m) return;
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+      function confirmLogout() {
+        window.location.href = '/logout';
+      }
+
+      // Intercept logout link clicks
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('a[href="/logout"]').forEach(a => {
+          a.addEventListener('click', function(e) {
+            e.preventDefault();
+            openLogoutConfirm();
+          });
+        });
+      });
       async function fetchStats() {
         try {
           const res = await fetch("/api/stats");
