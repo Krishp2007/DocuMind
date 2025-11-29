@@ -465,6 +465,26 @@
       </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black/70 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+      <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-slide-in flex flex-col">
+        <div class="gradient-card p-5 border-b flex justify-between items-center">
+          <h3 class="text-lg font-bold text-white">Delete Document</h3>
+          <button onclick="closeDeleteModal()" class="text-white text-xl hover:text-red-200"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-6 flex flex-col items-center justify-center gap-4">
+          <div class="text-center">
+            <div class="text-gray-700 text-base mb-2">Are you sure you want to delete:</div>
+            <div id="deleteDocTitle" class="font-bold text-lg text-indigo-700 mb-4"></div>
+          </div>
+          <div class="flex gap-4">
+            <button id="confirmDeleteBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow">Delete</button>
+            <button onclick="closeDeleteModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg shadow">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       // 1. Live Stats
       async function fetchStats() {
@@ -645,49 +665,41 @@
       }
 
       // Delete Document Function
+      let pendingDeleteDocId = null;
       function deleteDocument(docId, docTitle) {
-        if (!confirm(`Are you sure you want to delete "${docTitle}"?\n\nThis action cannot be undone.`)) {
-          return;
-        }
-        
-        // Show loading state
-        const deleteBtn = event.target.closest('button');
-        const originalHTML = deleteBtn.innerHTML;
-        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        deleteBtn.disabled = true;
-        
-        fetch(`/api/delete-document/${docId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            showNotification('✅ Document Deleted', `"${docTitle}" has been deleted successfully.`, 'success');
-            // Remove the card from UI
-            const card = deleteBtn.closest('.bg-white.rounded-2xl');
-            card.style.animation = 'fadeOut 0.3s ease-out';
-            setTimeout(() => {
-              card.remove();
-              // Refresh stats and page if needed
-              fetchStats();
-              // Reload page after a moment to update counts
-              setTimeout(() => window.location.reload(), 1000);
-            }, 300);
-          } else {
-            showNotification('❌ Delete Failed', data.error || 'Failed to delete document.', 'error');
-            deleteBtn.innerHTML = originalHTML;
-            deleteBtn.disabled = false;
-          }
-        })
-        .catch(error => {
-          console.error('Error deleting document:', error);
-          showNotification('❌ Delete Failed', 'An error occurred while deleting the document.', 'error');
-          deleteBtn.innerHTML = originalHTML;
-          deleteBtn.disabled = false;
-        });
+        pendingDeleteDocId = docId;
+        document.getElementById('deleteDocTitle').innerText = docTitle;
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.add('flex');
+        // Attach event to confirm button
+        document.getElementById('confirmDeleteBtn').onclick = function() {
+          this.disabled = true;
+          fetch(`/api/delete-document/${pendingDeleteDocId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          })
+          .then(res => res.json())
+          .then(data => {
+            closeDeleteModal();
+            if (data.success) {
+              showNotification('Deleted', 'Document deleted successfully.', 'success');
+              setTimeout(() => { location.reload(); }, 1200);
+            } else {
+              showNotification('Error', data.error || 'Failed to delete document.', 'error');
+            }
+          })
+          .catch(() => {
+            closeDeleteModal();
+            showNotification('Error', 'Failed to delete document.', 'error');
+          });
+        };
+      }
+
+      function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('deleteModal').classList.remove('flex');
+        document.getElementById('confirmDeleteBtn').disabled = false;
+        pendingDeleteDocId = null;
       }
 
       // Handle multiple file upload with validation

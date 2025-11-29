@@ -59,15 +59,15 @@
                 <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
                     <div class="relative">
                         <div class="w-24 h-24 md:w-32 md:h-32 bg-white/20 backdrop-blur-lg rounded-full flex items-center justify-center border-4 border-white/30 shadow-2xl">
-                            <span class="text-4xl md:text-5xl font-black text-white">{{ user_session.full_name[0]|upper if user_session.full_name else user_session.username[0]|upper }}</span>
+                            <span id="avatarInitial" class="text-4xl md:text-5xl font-black text-white">{{ user_session.full_name[0]|upper if user_session.full_name else user_session.username[0]|upper }}</span>
                         </div>
                         <div class="absolute -bottom-2 -right-2 bg-indigo-500 rounded-full p-2 border-4 border-white shadow-lg">
                             <i class="fas fa-check text-white text-sm"></i>
                         </div>
                     </div>
                     <div class="flex-1 text-center md:text-left">
-                        <h1 class="text-2xl md:text-4xl font-black text-white mb-2">{{ user_session.full_name or 'User' }}</h1>
-                        <p class="text-indigo-100 text-sm md:text-base mb-3">@{{ user_session.username }}</p>
+                        <h1 id="displayFullName" class="text-2xl md:text-4xl font-black text-white mb-2">{{ user_session.full_name or 'User' }}</h1>
+                        <p id="displayUsername" class="text-indigo-100 text-sm md:text-base mb-3">@{{ user_session.username }}</p>
                         <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30">
                             <span class="text-xs font-bold text-white uppercase tracking-wider">{{ user_session.role }}</span>
                         </div>
@@ -95,6 +95,16 @@
             </div>
         </div>
 
+        <!-- Profile Card Header Buttons (Responsive) -->
+        <div class="flex flex-col md:flex-row gap-3 justify-center md:justify-end mt-6 mb-2">
+          <button onclick="openEditProfileModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow text-base flex items-center gap-2 w-full md:w-auto">
+            <i class="fas fa-user-edit"></i> Edit Profile
+          </button>
+          <button onclick="openChangePasswordModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg shadow text-base flex items-center gap-2 w-full md:w-auto">
+            <i class="fas fa-key"></i> Change Password
+          </button>
+        </div>
+
         <!-- Account Information -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 animate-fade-in">
@@ -105,11 +115,11 @@
                 <div class="space-y-4">
                     <div class="border-b border-gray-100 pb-3">
                         <p class="text-xs font-bold text-gray-400 uppercase mb-1">Full Name</p>
-                        <p class="text-base font-semibold text-gray-800">{{ user_session.full_name or 'Not set' }}</p>
+                        <p id="infoFullName" class="text-base font-semibold text-gray-800">{{ user_session.full_name or 'Not set' }}</p>
                     </div>
                     <div class="border-b border-gray-100 pb-3">
                         <p class="text-xs font-bold text-gray-400 uppercase mb-1">Username</p>
-                        <p class="text-base font-semibold text-gray-800">@{{ user_session.username }}</p>
+                        <p id="infoUsername" class="text-base font-semibold text-gray-800">@{{ user_session.username }}</p>
                     </div>
                     <div class="border-b border-gray-100 pb-3">
                         <p class="text-xs font-bold text-gray-400 uppercase mb-1">Role</p>
@@ -184,11 +194,12 @@
                             </td>
                             <td class="py-3 px-4">
                                 <button
-                                    onclick='deleteDocumentFromProfile({{ upload.id }}, "{{ upload.filename|replace("'", "\\'")|replace('"', '\\"') }}")'
-                                    class="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition border border-red-200 group"
-                                    title="Delete document"
+                                  data-doc-id="{{ upload.id }}"
+                                  data-filename="{{ upload.filename|e }}"
+                                  class="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition border border-red-200 group profile-delete-btn"
+                                  title="Delete document"
                                 >
-                                    <i class="fas fa-trash-alt text-sm"></i>
+                                  <i class="fas fa-trash-alt text-sm"></i>
                                 </button>
                             </td>
                         </tr>
@@ -286,6 +297,264 @@
           deleteBtn.disabled = false;
         });
       }
+
+      // Edit/Change/Forgot handlers set up after DOM ready
+      function openEditProfileModal() {
+        document.getElementById('editProfileModal').classList.remove('hidden');
+        document.getElementById('editProfileModal').classList.add('flex');
+      }
+      function closeEditProfileModal() {
+        const modal = document.getElementById('editProfileModal');
+        if (modal) {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
+        const ue = document.getElementById('usernameError');
+        if (ue) ue.classList.add('hidden');
+      }
+
+      function openChangePasswordModal() {
+        const modal = document.getElementById('changePasswordModal');
+        if (modal) {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        }
+      }
+      function closeChangePasswordModal() {
+        const modal = document.getElementById('changePasswordModal');
+        if (modal) {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
+        const pe = document.getElementById('passwordError');
+        if (pe) pe.classList.add('hidden');
+      }
+
+      function openForgotPasswordModal() {
+        const modal = document.getElementById('forgotPasswordModal');
+        if (modal) {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        }
+      }
+      function closeForgotPasswordModal() {
+        const modal = document.getElementById('forgotPasswordModal');
+        if (modal) {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
+        const fe = document.getElementById('forgotError');
+        if (fe) fe.classList.add('hidden');
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        const editForm = document.getElementById('editProfileForm');
+        if (editForm) {
+          editForm.onsubmit = async function(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('editFullName').value.trim();
+            const username = document.getElementById('editUsername').value.trim().toLowerCase();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            fetch('/api/update-profile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ full_name: fullName, username: username })
+            })
+            .then(res => res.json())
+            .then(data => {
+              btn.disabled = false;
+              btn.innerHTML = 'Save Changes';
+              if (data.success) {
+                showNotification('Profile Updated', 'Your profile was updated successfully.', 'success');
+                // Update DOM elements so UI reflects the change immediately
+                try {
+                  if (data.full_name) {
+                    const name = data.full_name;
+                    const avatar = document.getElementById('avatarInitial');
+                    const headerName = document.getElementById('displayFullName');
+                    const infoName = document.getElementById('infoFullName');
+                    if (avatar) avatar.innerText = name.charAt(0).toUpperCase();
+                    if (headerName) headerName.innerText = name;
+                    if (infoName) infoName.innerText = name;
+                  }
+                  if (data.username) {
+                    const uname = data.username;
+                    const headerUser = document.getElementById('displayUsername');
+                    const infoUser = document.getElementById('infoUsername');
+                    if (headerUser) headerUser.innerText = '@' + uname;
+                    if (infoUser) infoUser.innerText = '@' + uname;
+                  }
+                } catch (e) {
+                  console.error('Error updating profile DOM:', e);
+                }
+
+                closeEditProfileModal();
+              } else {
+                const errMsg = data.error || data.message || 'Failed to update profile.';
+                if (errMsg && errMsg.toLowerCase().includes('username')) {
+                  const ue = document.getElementById('usernameError');
+                  if (ue) {
+                    ue.innerText = errMsg;
+                    ue.classList.remove('hidden');
+                  }
+                } else {
+                  showNotification('Error', errMsg, 'error');
+                }
+              }
+            })
+            .catch(() => {
+              btn.disabled = false;
+              btn.innerHTML = 'Save Changes';
+              showNotification('Error', 'Failed to update profile.', 'error');
+            });
+          };
+        }
+
+        const changeForm = document.getElementById('changePasswordForm');
+        if (changeForm) {
+          changeForm.onsubmit = async function(e) {
+            e.preventDefault();
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            fetch('/api/change-password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ old_password: oldPassword, new_password: newPassword, confirm_password: confirmPassword })
+            })
+            .then(res => res.json())
+            .then(data => {
+              btn.disabled = false;
+              btn.innerHTML = 'Change Password';
+              if (data.success) {
+                showNotification('Password Changed', 'Your password was updated successfully.', 'success');
+                closeChangePasswordModal();
+              } else {
+                if (data.error) {
+                  const pe = document.getElementById('passwordError');
+                  if (pe) {
+                    pe.innerText = data.error;
+                    pe.classList.remove('hidden');
+                  }
+                } else {
+                  showNotification('Error', 'Failed to change password.', 'error');
+                }
+              }
+            })
+            .catch(() => {
+              btn.disabled = false;
+              btn.innerHTML = 'Change Password';
+              showNotification('Error', 'Failed to change password.', 'error');
+            });
+          };
+        }
+
+        const forgotForm = document.getElementById('forgotPasswordForm');
+        if (forgotForm) {
+          forgotForm.onsubmit = async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('forgotUsername').value.trim().toLowerCase();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            fetch('/api/forgot-password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username })
+            })
+            .then(res => res.json())
+            .then(data => {
+              btn.disabled = false;
+              btn.innerHTML = 'Send Reset Link';
+              if (data.success) {
+                showNotification('Reset Link Sent', 'Check your email for the reset link (demo).', 'success');
+                closeForgotPasswordModal();
+              } else {
+                if (data.error) {
+                  const fe = document.getElementById('forgotError');
+                  if (fe) {
+                    fe.innerText = data.error;
+                    fe.classList.remove('hidden');
+                  }
+                } else {
+                  showNotification('Error', 'Failed to send reset link.', 'error');
+                }
+              }
+            })
+            .catch(() => {
+              btn.disabled = false;
+              btn.innerHTML = 'Send Reset Link';
+              showNotification('Error', 'Failed to send reset link.', 'error');
+            });
+          };
+        }
+      });
+
+      // Profile delete modal flow (bound on DOMContentLoaded)
+      let _pendingProfileDeleteId = null;
+      function openProfileDeleteModal(docId, docTitle) {
+        _pendingProfileDeleteId = docId;
+        const modal = document.getElementById('profileDeleteModal');
+        if (!modal) return;
+        const titleEl = modal.querySelector('.delete-file-name');
+        if (titleEl) titleEl.innerText = docTitle;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+      function closeProfileDeleteModal() {
+        const modal = document.getElementById('profileDeleteModal');
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        _pendingProfileDeleteId = null;
+      }
+      async function confirmProfileDelete() {
+        if (!_pendingProfileDeleteId) return;
+        const btn = document.getElementById('profileDeleteConfirmBtn');
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+        try {
+          const res = await fetch(`/api/delete-document/${_pendingProfileDeleteId}`, { method: 'POST' });
+          const data = await res.json();
+          if (data.success) {
+            showNotification('✅ Document Deleted', `"${document.querySelector('#profileDeleteModal .delete-file-name').innerText}" has been deleted.`, 'success');
+            // remove row if present
+            const btnSel = document.querySelector(`button[data-doc-id="${_pendingProfileDeleteId}"]`);
+            const row = btnSel ? btnSel.closest('tr') : null;
+            if (row) {
+              row.style.animation = 'fadeOut 0.3s ease-out';
+              setTimeout(() => row.remove(), 300);
+            }
+            closeProfileDeleteModal();
+          } else {
+            showNotification('❌ Delete Failed', data.error || 'Failed to delete document.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = orig;
+          }
+        } catch (e) {
+          console.error('Delete error:', e);
+          showNotification('❌ Delete Failed', 'An error occurred while deleting the document.', 'error');
+          btn.disabled = false;
+          btn.innerHTML = orig;
+        }
+      }
+
+      // Attach click handlers to profile delete buttons (in case they were rendered before DOMContentLoaded binding)
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.profile-delete-btn').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            const id = this.dataset.docId;
+            const filename = this.dataset.filename || this.getAttribute('data-filename') || 'this file';
+            openProfileDeleteModal(id, filename);
+          });
+        });
+      });
     </script>
     <style>
       @keyframes slideIn {
@@ -300,6 +569,110 @@
         animation: slideIn 0.3s ease-out;
       }
     </style>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="fixed inset-0 bg-black/70 z-[80] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+      <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-fade-in flex flex-col">
+        <div class="gradient-bg p-5 border-b flex justify-between items-center">
+          <h3 class="text-lg font-bold text-white">Edit Profile</h3>
+          <button onclick="closeEditProfileModal()" class="text-white text-xl hover:text-red-200"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="editProfileForm" class="p-6 flex flex-col gap-6">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 mb-1">Full Name</label>
+            <input type="text" name="full_name" id="editFullName" required class="w-full bg-gray-100 border border-gray-300 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition" value="{{ user_session.full_name }}">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 mb-1">Username</label>
+            <input type="text" name="username" id="editUsername" required class="w-full bg-gray-100 border border-gray-300 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition" value="{{ user_session.username }}">
+            <div id="usernameError" class="text-xs text-red-500 mt-1 hidden"></div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 mb-1">Role</label>
+            <input type="text" name="role" id="editRole" class="w-full bg-gray-100 border border-gray-300 rounded-lg p-3 text-sm text-gray-500" value="{{ user_session.role }}" readonly>
+          </div>
+          <div class="flex gap-4 justify-end">
+            <button type="button" onclick="closeEditProfileModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg shadow">Cancel</button>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="fixed inset-0 bg-black/70 z-[90] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+      <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-fade-in flex flex-col">
+        <div class="gradient-bg p-5 border-b flex justify-between items-center">
+          <h3 class="text-lg font-bold text-white">Change Password</h3>
+          <button onclick="closeChangePasswordModal()" class="text-white text-xl hover:text-red-200"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="changePasswordForm" class="p-6 flex flex-col gap-6">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 mb-1">Old Password</label>
+            <input type="password" name="old_password" id="oldPassword" required class="w-full bg-gray-100 border border-gray-300 rounded-lg p-3 text-sm focus:border-purple-500 focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 mb-1">New Password</label>
+            <input type="password" name="new_password" id="newPassword" required class="w-full bg-gray-100 border border-gray-300 rounded-lg p-3 text-sm focus:border-purple-500 focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 mb-1">Confirm New Password</label>
+            <input type="password" name="confirm_password" id="confirmPassword" required class="w-full bg-gray-100 border border-gray-300 rounded-lg p-3 text-sm focus:border-purple-500 focus:outline-none transition">
+            <div id="passwordError" class="text-xs text-red-500 mt-1 hidden"></div>
+          </div>
+          <div class="flex gap-4 justify-end">
+            <button type="button" onclick="closeChangePasswordModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg shadow">Cancel</button>
+            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg shadow">Change Password</button>
+          </div>
+        </form>
+        <div class="p-4 text-center">
+          <button onclick="openForgotPasswordModal();closeChangePasswordModal();" class="text-indigo-600 hover:underline text-sm font-bold">Forgot Password?</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="fixed inset-0 bg-black/70 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+      <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-fade-in flex flex-col">
+        <div class="gradient-bg p-5 border-b flex justify-between items-center">
+          <h3 class="text-lg font-bold text-white">Forgot Password</h3>
+          <button onclick="closeForgotPasswordModal()" class="text-white text-xl hover:text-red-200"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="forgotPasswordForm" class="p-6 flex flex-col gap-6">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 mb-1">Username</label>
+            <input type="text" name="username" id="forgotUsername" required class="w-full bg-gray-100 border border-gray-300 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
+            <div id="forgotError" class="text-xs text-red-500 mt-1 hidden"></div>
+          </div>
+          <div class="flex gap-4 justify-end">
+            <button type="button" onclick="closeForgotPasswordModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg shadow">Cancel</button>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow">Send Reset Link</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Floating edit button removed (duplicate control) -->
+    <!-- Profile Delete Modal -->
+    <div id="profileDeleteModal" class="fixed inset-0 bg-black/60 z-[110] hidden items-center justify-center p-4 backdrop-blur-sm">
+      <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-fade-in">
+        <div class="p-6">
+          <div class="flex items-start gap-4">
+            <div class="bg-red-50 text-red-600 p-3 rounded-lg">
+              <i class="fas fa-trash-alt"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-gray-800">Delete Document</h3>
+              <p class="text-sm text-gray-600 mt-1">Are you sure you want to delete <span class="font-semibold delete-file-name">this file</span>? This action cannot be undone.</p>
+            </div>
+          </div>
+          <div class="mt-6 flex justify-end gap-3">
+            <button onclick="closeProfileDeleteModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-5 rounded-lg">Cancel</button>
+            <button id="profileDeleteConfirmBtn" onclick="confirmProfileDelete()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-5 rounded-lg">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
 </body>
 </html>
 

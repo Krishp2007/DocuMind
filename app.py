@@ -89,7 +89,7 @@ def init_db():
 init_db()
 
 # --- AI CONFIG ---
-API_KEY="AIzaSyC14lPUtQho-9evSHDMoZfWI-NG_IVOCXq"
+API_KEY="AIzaSyC14lPUtQho-9evSHDMoZfWI-NG_IVOCGo"
 genai.configure(api_key=API_KEY)
 # Updated to use gemini-2.5-flash (gemini-1.5-flash is deprecated)
 model = genai.GenerativeModel("gemini-2.5-flash")
@@ -801,6 +801,90 @@ def delete_document(doc_id):
     except Exception as e:
         print(f"Error deleting document: {e}")
         return jsonify({"error": f"Failed to delete document: {str(e)}"}), 500
+
+# --- PROFILE UPDATE ROUTE ---
+@app.route('/api/update-profile', methods=['POST'])
+def update_profile():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Not authenticated.'}), 401
+
+    db = get_db()
+    user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    if not user:
+        return jsonify({'success': False, 'error': 'User not found.'}), 404
+
+    data = request.get_json() or {}
+    new_full_name = (data.get('full_name') or '').strip()
+    new_username = (data.get('username') or '').strip().lower()
+
+    if not new_full_name or not new_username:
+        return jsonify({'success': False, 'error': 'Full name and username are required.'}), 400
+
+    old_username = user['username']
+
+    # If username changed, ensure availability
+    if new_username != old_username:
+        exists = db.execute('SELECT id FROM users WHERE username = ? AND id != ?', (new_username, user['id'])).fetchone()
+        if exists:
+            return jsonify({'success': False, 'error': 'Username already taken.'}), 409
+
+    try:
+        # Update user record
+        db.execute('UPDATE users SET full_name = ?, username = ? WHERE id = ?', (new_full_name, new_username, user['id']))
+
+        # If username changed, update documents.uploader so uploaded files remain associated
+        if new_username != old_username:
+            db.execute('UPDATE documents SET uploader = ? WHERE uploader = ?', (new_username, old_username))
+
+        db.commit()
+
+        # Update session values so UI and subsequent requests use the new username
+        session['full_name'] = new_full_name
+        session['username'] = new_username
+
+        return jsonify({'success': True, 'message': 'Profile updated successfully.', 'full_name': new_full_name, 'username': new_username})
+
+    except Exception as e:
+        db.rollback()
+        print(f"Error updating profile: {e}")
+        return jsonify({'success': False, 'error': 'Failed to update profile.'}), 500
+
+# --- CHANGE PASSWORD ROUTE ---
+@app.route('/api/change-password', methods=['POST'])
+def change_password():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Not authenticated.'}), 401
+    db = get_db()
+    user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    if not user:
+        return jsonify({'success': False, 'error': 'User not found.'}), 404
+    data = request.get_json()
+    old_pw = data.get('old_password', '')
+    new_pw = data.get('new_password', '')
+    confirm_pw = data.get('confirm_password', '')
+    if not old_pw or not new_pw or not confirm_pw:
+        return jsonify({'success': False, 'error': 'All fields are required.'}), 400
+    if new_pw != confirm_pw:
+        return jsonify({'success': False, 'error': 'New passwords do not match.'}), 400
+    if not check_password_hash(user['password_hash'], old_pw):
+        return jsonify({'success': False, 'error': 'Old password is incorrect.'}), 403
+    db.execute('UPDATE users SET password_hash = ? WHERE id = ?', (generate_password_hash(new_pw), user['id']))
+    db.commit()
+    return jsonify({'success': True, 'message': 'Password changed successfully.'})
+
+# --- FORGOT PASSWORD ROUTE (stub, for demo) ---
+@app.route('/api/forgot-password', methods=['POST'])
+def forgot_password():
+    db = get_db()
+    data = request.get_json()
+    username = data.get('username', '').strip().lower()
+    if not username:
+        return jsonify({'success': False, 'error': 'Username required.'}), 400
+    user = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+    if not user:
+        return jsonify({'success': False, 'error': 'User not found.'}), 404
+    # For demo: just return success (in real app, send email or code)
+    return jsonify({'success': True, 'message': 'Password reset link sent (demo).', 'username': username})
 
 if __name__ == '__main__':
     app.run(debug=True)
