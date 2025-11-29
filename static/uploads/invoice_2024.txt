@@ -1,0 +1,9 @@
+INVOICE #99283
+    Date: 2024-11-20
+    To: ACME Corp
+    -------------------------
+    Service: Consulting
+    Hours: 40
+    Rate: $100/hr
+    TOTAL AMOUNT DUE: $4,000
+    Please pay within 30 days.

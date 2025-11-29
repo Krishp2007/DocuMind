@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile - DocuMind</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+        body {
+            font-family: "Inter", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-nav border-b border-gray-200 sticky top-0 z-40 px-4 py-3 md:px-8 md:py-4 shadow-sm">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/dashboard" class="flex items-center gap-2 hover:opacity-80 transition">
+                <div class="bg-indigo-600 text-white w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
+                    <i class="fas fa-brain text-sm md:text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold tracking-tight">DocuMind</h1>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider hidden md:block">Intelligence Platform</p>
+                </div>
+            </a>
+            <div class="flex items-center gap-3">
+                <a href="/dashboard" class="hidden md:block text-gray-600 hover:text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+                <a href="/logout" class="bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 px-4 py-2 rounded-lg text-sm font-bold transition">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 md:px-8 py-8 max-w-6xl">
+        <!-- Profile Header Card -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden mb-6 animate-fade-in">
+            <div class="gradient-bg px-6 md:px-10 py-8 md:py-12">
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+                    <div class="relative">
+                        <div class="w-24 h-24 md:w-32 md:h-32 bg-white/20 backdrop-blur-lg rounded-full flex items-center justify-center border-4 border-white/30 shadow-2xl">
+                            <span class="text-4xl md:text-5xl font-black text-white">{{ user_session.full_name[0]|upper if user_session.full_name else user_session.username[0]|upper }}</span>
+                        </div>
+                        <div class="absolute -bottom-2 -right-2 bg-indigo-500 rounded-full p-2 border-4 border-white shadow-lg">
+                            <i class="fas fa-check text-white text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 text-center md:text-left">
+                        <h1 class="text-2xl md:text-4xl font-black text-white mb-2">{{ user_session.full_name or 'User' }}</h1>
+                        <p class="text-indigo-100 text-sm md:text-base mb-3">@{{ user_session.username }}</p>
+                        <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30">
+                            <span class="text-xs font-bold text-white uppercase tracking-wider">{{ user_session.role }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 p-6 bg-gray-50">
+                <div class="text-center">
+                    <p class="text-xs font-bold text-gray-500 uppercase mb-1">Total Documents</p>
+                    <p class="text-2xl md:text-3xl font-black text-indigo-600">{{ total_docs }}</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs font-bold text-gray-500 uppercase mb-1">Total Value</p>
+                    <p class="text-2xl md:text-3xl font-black text-green-600">${{ "{:,.2f}".format(total_value) }}</p>
+                </div>
+                <div class="text-center col-span-2 md:col-span-1">
+                    <p class="text-xs font-bold text-gray-500 uppercase mb-1">Account Status</p>
+                    <div class="inline-flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                        <i class="fas fa-circle text-xs"></i>
+                        <span class="text-sm font-bold">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Information -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 animate-fade-in">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-info-circle text-indigo-600"></i>
+                    Account Information
+                </h2>
+                <div class="space-y-4">
+                    <div class="border-b border-gray-100 pb-3">
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Full Name</p>
+                        <p class="text-base font-semibold text-gray-800">{{ user_session.full_name or 'Not set' }}</p>
+                    </div>
+                    <div class="border-b border-gray-100 pb-3">
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Username</p>
+                        <p class="text-base font-semibold text-gray-800">@{{ user_session.username }}</p>
+                    </div>
+                    <div class="border-b border-gray-100 pb-3">
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">Role</p>
+                        <p class="text-base font-semibold text-gray-800">{{ user_session.role }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-1">User ID</p>
+                        <p class="text-base font-mono text-gray-600">#{{ user_session.user_id }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 animate-fade-in">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-indigo-600"></i>
+                    Activity Summary
+                </h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100">
+                        <div>
+                            <p class="text-xs font-bold text-indigo-600 uppercase">Documents Uploaded</p>
+                            <p class="text-2xl font-black text-indigo-900">{{ total_docs }}</p>
+                        </div>
+                        <i class="fas fa-file-upload text-3xl text-indigo-400"></i>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
+                        <div>
+                            <p class="text-xs font-bold text-green-600 uppercase">Financial Value</p>
+                            <p class="text-2xl font-black text-green-900">${{ "{:,.2f}".format(total_value) }}</p>
+                        </div>
+                        <i class="fas fa-dollar-sign text-3xl text-green-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Uploads -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 animate-fade-in">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-clock text-indigo-600"></i>
+                Recent Uploads
+            </h2>
+            {% if recent_uploads %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Filename</th>
+                            <th class="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase hidden md:table-cell">Title</th>
+                            <th class="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Category</th>
+                            <th class="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase hidden md:table-cell">Date</th>
+                            <th class="text-center py-3 px-4 text-xs font-bold text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for upload in recent_uploads %}
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-file-pdf text-red-500"></i>
+                                    <span class="text-sm font-semibold text-gray-800 truncate max-w-[150px]">{{ upload.filename }}</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 hidden md:table-cell">
+                                <span class="text-sm text-gray-600">{{ upload.title or 'N/A' }}</span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded">{{ upload.category }}</span>
+                            </td>
+                            <td class="py-3 px-4 hidden md:table-cell">
+                                <span class="text-sm text-gray-500">{{ upload.upload_date }}</span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <button
+                                    onclick='deleteDocumentFromProfile({{ upload.id }}, "{{ upload.filename|replace("'", "\\'")|replace('"', '\\"') }}")'
+                                    class="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition border border-red-200 group"
+                                    title="Delete document"
+                                >
+                                    <i class="fas fa-trash-alt text-sm"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-12 text-gray-400">
+                <i class="fas fa-inbox text-4xl mb-3 opacity-30"></i>
+                <p>No documents uploaded yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Custom Notification Container -->
+    <div id="notificationContainer" class="fixed top-20 right-4 md:right-6 z-[100] space-y-3 max-w-md"></div>
+
+    <script>
+      // Custom Notification System
+      function showNotification(title, message, type = 'info') {
+        const container = document.getElementById('notificationContainer');
+        if (!container) return;
+        
+        const notification = document.createElement('div');
+        const bgColor = type === 'error' ? 'bg-red-50 border-red-500' : type === 'success' ? 'bg-green-50 border-green-500' : 'bg-blue-50 border-blue-500';
+        const iconColor = type === 'error' ? 'text-red-500' : type === 'success' ? 'text-green-500' : 'text-blue-500';
+        const textColor = type === 'error' ? 'text-red-700' : type === 'success' ? 'text-green-700' : 'text-blue-700';
+        const icon = type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
+        
+        notification.className = `p-4 rounded-xl border-l-4 ${bgColor} shadow-2xl flex items-start gap-3 animate-slide-in ${textColor} min-w-[300px] max-w-md`;
+        notification.innerHTML = `
+          <div class="flex items-start gap-3 flex-1">
+            <i class="fas ${icon} ${iconColor} text-xl mt-0.5"></i>
+            <div class="flex-1">
+              <div class="font-bold text-sm mb-1">${title}</div>
+              <div class="text-xs ${textColor} opacity-90">${message}</div>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600 transition">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+          notification.style.animation = 'fadeOut 0.3s ease-out';
+          setTimeout(() => notification.remove(), 300);
+        }, 5000);
+      }
+
+      // Delete Document Function for Profile
+      function deleteDocumentFromProfile(docId, docTitle) {
+        if (!confirm(`Are you sure you want to delete "${docTitle}"?\n\nThis action cannot be undone.`)) {
+          return;
+        }
+        
+        // Show loading state
+        const deleteBtn = event.target.closest('button');
+        const originalHTML = deleteBtn.innerHTML;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i>';
+        deleteBtn.disabled = true;
+        
+        fetch(`/api/delete-document/${docId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showNotification('✅ Document Deleted', `"${docTitle}" has been deleted successfully.`, 'success');
+            // Remove the row from table
+            const row = deleteBtn.closest('tr');
+            row.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+              row.remove();
+              // Reload page to update counts
+              setTimeout(() => window.location.reload(), 1000);
+            }, 300);
+          } else {
+            showNotification('❌ Delete Failed', data.error || 'Failed to delete document.', 'error');
+            deleteBtn.innerHTML = originalHTML;
+            deleteBtn.disabled = false;
+          }
+        })
+        .catch(error => {
+          console.error('Error deleting document:', error);
+          showNotification('❌ Delete Failed', 'An error occurred while deleting the document.', 'error');
+          deleteBtn.innerHTML = originalHTML;
+          deleteBtn.disabled = false;
+        });
+      }
+    </script>
+    <style>
+      @keyframes slideIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100%); }
+      }
+      .animate-slide-in {
+        animation: slideIn 0.3s ease-out;
+      }
+    </style>
+</body>
+</html>
+

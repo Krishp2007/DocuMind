@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DocuMind - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .glass-nav {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes slideIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100%); }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.3s ease-out;
+      }
+      .animate-slide-in {
+        animation: slideIn 0.3s ease-out;
+      }
+      .gradient-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-gray-50 via-indigo-50/30 to-purple-50/30 text-slate-800 pb-24 md:pb-0 min-h-screen">
+    <!-- Navigation -->
+    <nav
+      class="glass-nav border-b border-gray-200 sticky top-0 z-40 px-4 py-3 md:px-8 md:py-4 shadow-sm"
+    >
+      <div class="container mx-auto flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <div
+            class="bg-indigo-600 text-white w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 transform hover:scale-105 transition"
+          >
+            <i class="fas fa-brain text-lg md:text-xl"></i>
+          </div>
+          <div>
+            <h1 class="text-xl md:text-2xl font-black tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              DocuMind
+            </h1>
+            <p
+              class="text-[10px] text-gray-500 font-bold uppercase tracking-wider hidden md:block"
+            >
+              Intelligence Platform
+            </p>
+          </div>
+        </div>
+
+        <div class="hidden md:flex items-center gap-4">
+          <a
+            href="/profile"
+            class="flex items-center gap-2 text-gray-600 hover:text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50 transition font-semibold text-sm"
+          >
+            <i class="fas fa-user-circle"></i>
+            <span>{{ user.full_name or user.username }}</span>
+          </a>
+          <div class="h-6 w-px bg-gray-300"></div>
+          <a
+            href="/logout"
+            class="bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 px-4 py-2 rounded-lg text-sm font-bold transition"
+          >
+            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+          </a>
+        </div>
+
+        <button
+          onclick="document.getElementById('mobileMenu').classList.toggle('hidden')"
+          class="md:hidden text-gray-600 p-2 text-xl hover:bg-gray-100 rounded-lg transition"
+        >
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div
+        id="mobileMenu"
+        class="hidden md:hidden mt-4 border-t pt-4 space-y-3 animate-fade-in"
+      >
+        <a
+          href="/profile"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-indigo-50 transition"
+        >
+          <div
+            class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg"
+          >
+            {{ user.username[0]|upper }}
+          </div>
+          <div>
+            <p class="font-bold text-gray-800">{{ user.full_name or user.username }}</p>
+            <p class="text-xs text-gray-500">{{ user.role }}</p>
+          </div>
+        </a>
+        <a
+          href="/logout"
+          class="block bg-red-50 text-red-600 px-4 py-3 rounded-xl font-bold text-center hover:bg-red-100 transition"
+        >
+          <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
+        </a>
+      </div>
+    </nav>
+
+    <div class="container mx-auto px-4 md:px-8 py-6 md:py-8 max-w-7xl">
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+        <a
+          href="/dashboard/value"
+          class="bg-white p-5 md:p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer animate-fade-in group"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Value</p>
+            <i class="fas fa-dollar-sign text-green-500 text-xl group-hover:scale-110 transition-transform"></i>
+          </div>
+          <h2
+            class="text-xl sm:text-2xl md:text-3xl font-black text-green-600 break-words overflow-wrap-anywhere"
+            id="statValue"
+          >
+            Loading...
+          </h2>
+          <p class="text-xs text-gray-400 mt-2 group-hover:text-gray-600 transition-colors">Click to view details →</p>
+        </a>
+        <a
+          href="/dashboard/risk"
+          class="bg-white p-5 md:p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer animate-fade-in group"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">High Risk</p>
+            <i class="fas fa-exclamation-triangle text-red-500 text-xl group-hover:scale-110 transition-transform"></i>
+          </div>
+          <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-red-500" id="statRisk">
+            --
+          </h2>
+          <p class="text-xs text-gray-400 mt-2 group-hover:text-gray-600 transition-colors">Click to view details →</p>
+        </a>
+        <a
+          href="/dashboard/pending"
+          class="bg-white p-5 md:p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer animate-fade-in group"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Pending</p>
+            <i class="fas fa-clock text-yellow-500 text-xl group-hover:scale-110 transition-transform"></i>
+          </div>
+          <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-yellow-500" id="statPending">
+            --
+          </h2>
+          <p class="text-xs text-gray-400 mt-2 group-hover:text-gray-600 transition-colors">Click to view details →</p>
+        </a>
+        <div
+          class="gradient-card p-5 md:p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow animate-fade-in"
+        >
+          <form
+            action="/upload"
+            method="post"
+            enctype="multipart/form-data"
+            class="w-full h-full"
+            id="uploadForm"
+          >
+            <label
+              class="flex flex-col md:flex-row items-center justify-center gap-3 w-full h-full cursor-pointer text-white hover:opacity-90 transition"
+            >
+              <i class="fas fa-cloud-upload-alt text-3xl md:text-4xl"></i>
+              <div class="text-center md:text-left">
+                <span class="block font-bold text-base md:text-lg">Upload Documents</span>
+                <span class="block text-xs md:text-sm opacity-90">Multiple files • PDF, DOCX, TXT only</span>
+              </div>
+              <input
+                type="file"
+                name="files"
+                accept=".pdf,.docx,.txt"
+                multiple
+                class="hidden"
+                id="fileInput"
+                onchange="handleFileUpload(event)"
+                required
+              />
+            </label>
+          </form>
+        </div>
+      </div>
+
+      <!-- Custom Notification Container -->
+      <div id="notificationContainer" class="fixed top-20 right-4 md:right-6 z-[100] space-y-3 max-w-md"></div>
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="mb-6 space-y-3 animate-fade-in">
+        {% for category, message in messages %}
+        <div
+          class="p-4 rounded-xl border-l-4 bg-white shadow-lg flex items-start gap-3 text-sm md:text-base animate-slide-in {% if category=='error' %} border-red-500 {% else %} border-green-500 {% endif %}"
+        >
+          <i class="fas {% if category=='error' %}fa-exclamation-circle text-red-500{% else %}fa-check-circle text-green-500{% endif %} mt-0.5"></i>
+          <span class="font-medium {% if category=='error' %}text-red-700{% else %}text-green-700{% endif %}">{{ message }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
+
+      <!-- Documents Section -->
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl md:text-2xl font-black text-gray-800 flex items-center gap-3">
+          <i class="fas fa-folder-open text-indigo-600"></i>
+          Recent Documents
+          <span class="bg-indigo-100 text-indigo-700 text-xs md:text-sm px-3 py-1 rounded-full font-bold"
+            >{{ docs|length }}</span
+          >
+        </h3>
+      </div>
+
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+      >
+        {% for doc in docs %}
+        <div
+          class="bg-white rounded-2xl shadow-lg border border-gray-100 p-0 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in"
+        >
+          <div
+            class="h-2 w-full {% if doc.category=='Finance' %}bg-gradient-to-r from-green-500 to-emerald-500{% elif doc.category=='Legal' %}bg-gradient-to-r from-red-500 to-rose-500{% elif doc.category=='HR' %}bg-gradient-to-r from-blue-500 to-cyan-500{% elif doc.category=='Technical' %}bg-gradient-to-r from-purple-500 to-pink-500{% else %}bg-gradient-to-r from-gray-400 to-gray-500{% endif %}"
+          ></div>
+
+          <div class="p-5 md:p-6">
+            <div class="flex justify-between items-start mb-4">
+              <span
+                class="px-3 py-1.5 bg-gray-50 border border-gray-200 text-[10px] font-bold uppercase text-gray-600 tracking-wider rounded-lg"
+              >
+                {{ doc.category }}
+              </span>
+              {% if doc.risk_score > 70 %}
+              <div
+                class="flex items-center gap-1 text-red-600 bg-red-50 px-2.5 py-1 rounded-lg border border-red-200"
+              >
+                <i class="fas fa-bolt text-xs"></i>
+                <span class="text-[10px] font-bold">HIGH</span>
+              </div>
+              {% endif %}
+            </div>
+
+            <h3
+              class="font-bold text-gray-900 text-lg md:text-xl leading-tight mb-3 line-clamp-2 min-h-[3rem]"
+            >
+              {{ doc.title }}
+            </h3>
+            <p class="text-sm text-gray-600 mb-4 line-clamp-2 min-h-[2.5rem] leading-relaxed">
+              {{ doc.summary }}
+            </p>
+
+            {% if doc.formatted_money %}
+            <div
+              class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-3 rounded-xl flex items-center gap-3 mb-4"
+            >
+              <div
+                class="bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-lg"
+              >
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <span class="font-mono font-black text-green-700 text-base"
+                >{{ doc.formatted_money }}</span
+              >
+            </div>
+            {% endif %}
+
+            <!-- Risk Score -->
+            {% if doc.risk_score > 0 %}
+            <div class="mb-4">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs font-bold text-gray-500">Risk Score</span>
+                <span class="text-xs font-black {% if doc.risk_score > 70 %}text-red-600{% elif doc.risk_score > 40 %}text-yellow-600{% else %}text-green-600{% endif %}">{{ doc.risk_score }}%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  class="h-2 rounded-full {% if doc.risk_score > 70 %}bg-red-500{% elif doc.risk_score > 40 %}bg-yellow-500{% else %}bg-green-500{% endif %}"
+                  style="width: {{ doc.risk_score }}%"
+                ></div>
+              </div>
+            </div>
+            {% endif %}
+
+            <div class="flex items-center justify-between mt-4 gap-2">
+              <div class="grid grid-cols-2 gap-2 flex-1">
+                <a
+                  href="{{ doc.url }}"
+                  target="_blank"
+                  class="text-center py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-bold transition border border-gray-200 flex items-center justify-center gap-2"
+                >
+                  <i class="fas fa-external-link-alt"></i>
+                  View
+                </a>
+                <button
+                  onclick='openAnalysis({{ doc|tojson|safe }})'
+                  class="text-center py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold transition shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2"
+                >
+                  <i class="fas fa-search-plus"></i>
+                  Analysis
+                </button>
+              </div>
+              <button
+                onclick='deleteDocument({{ doc.id }}, "{{ doc.title|replace("'", "\\'")|replace('"', '\\"') }}")'
+                class="p-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-xs font-bold transition border border-red-200 flex items-center justify-center group"
+                title="Delete document"
+              >
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="col-span-full py-16 text-center text-gray-400 animate-fade-in">
+          <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-12">
+            <i class="fas fa-folder-open text-6xl mb-4 opacity-30"></i>
+            <p class="text-lg font-semibold mb-2">No documents found</p>
+            <p class="text-sm">Upload your first document to get started!</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Chat Widget -->
+    <div
+      class="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 pointer-events-none"
+    >
+      <div class="pointer-events-auto flex flex-col items-end">
+        <div
+          id="chatBox"
+          class="bg-white w-[calc(100vw-2rem)] md:w-96 h-[60vh] md:h-[500px] rounded-2xl shadow-2xl border border-gray-200 mb-4 hidden flex-col overflow-hidden transform transition-all duration-300 animate-slide-in"
+        >
+          <div
+            class="gradient-card p-4 text-white font-bold flex justify-between items-center"
+          >
+            <span class="flex items-center gap-2"
+              ><i class="fas fa-robot text-xl"></i> DocuChat AI</span
+            >
+            <button
+              onclick="toggleChat()"
+              class="p-2 hover:bg-white/20 rounded-lg transition"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div
+            id="chatHistory"
+            class="flex-1 p-4 overflow-y-auto bg-gradient-to-b from-gray-50 to-white space-y-3 text-sm hide-scrollbar"
+          >
+            <div
+              class="bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-900 p-4 rounded-xl w-4/5 shadow-sm"
+            >
+              👋 Hi! I'm your AI assistant. Ask me anything about your documents!
+            </div>
+          </div>
+          <div class="p-4 bg-white border-t border-gray-200 flex gap-2">
+            <input
+              type="text"
+              id="chatInput"
+              placeholder="Ask AI about your documents..."
+              class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+            />
+            <button
+              onclick="sendChat()"
+              class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl px-5 py-2.5 shadow-lg hover:shadow-xl transition transform hover:scale-105"
+            >
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+
+        <button
+          onclick="toggleChat()"
+          class="w-14 h-14 md:w-16 md:h-16 gradient-card hover:opacity-90 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl transition transform hover:scale-110 active:scale-95"
+        >
+          <i class="fas fa-comment"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Analysis Modal -->
+    <div
+      id="analysisModal"
+      class="fixed inset-0 bg-black/70 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm"
+      onclick="closeModalOnBackdrop(event)"
+    >
+      <div
+        class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-slide-in max-h-[90vh] flex flex-col"
+        onclick="event.stopPropagation()"
+      >
+        <div class="gradient-card p-5 border-b flex justify-between items-center">
+          <h3 class="font-black text-white text-xl flex items-center gap-2" id="modalTitle">
+            <i class="fas fa-chart-line"></i>
+            Analysis Report
+          </h3>
+          <button
+            onclick="closeAnalysisModal()"
+            class="text-white hover:bg-white/20 p-2 rounded-lg transition"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <div class="p-6 md:p-8 overflow-y-auto flex-1 space-y-6">
+          <div>
+            <p class="text-xs font-bold text-gray-400 uppercase mb-2 tracking-wider">
+              Executive Summary
+            </p>
+            <p
+              class="text-sm md:text-base text-gray-700 leading-relaxed bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100"
+              id="modalSummary"
+            >
+              Loading...
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gradient-to-br from-red-50 to-rose-50 p-4 rounded-xl border border-red-100">
+              <p class="text-xs text-gray-500 font-bold uppercase mb-3">Risk Score</p>
+              <div class="flex items-center gap-3 mb-2">
+                <div class="flex-1 bg-gray-200 rounded-full h-3">
+                  <div
+                    id="modalRiskBar"
+                    class="bg-gradient-to-r from-red-500 to-rose-500 h-3 rounded-full transition-all duration-500"
+                    style="width: 0%"
+                  ></div>
+                </div>
+                <span id="modalRisk" class="font-black text-lg text-red-600">0%</span>
+              </div>
+            </div>
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
+              <p class="text-xs text-gray-500 font-bold uppercase mb-3">Financial Value</p>
+              <p
+                id="modalMoney"
+                class="font-mono font-black text-2xl text-green-600"
+              >
+                --
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wider">
+              Detected Tags & Entities
+            </p>
+            <div id="modalTags" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 1. Live Stats
+      async function fetchStats() {
+        try {
+          const res = await fetch("/api/stats");
+          const data = await res.json();
+          document.getElementById("statValue").innerText =
+            new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            }).format(data.total_value || 0);
+          document.getElementById("statRisk").innerText = data.high_risk || 0;
+          document.getElementById("statPending").innerText = data.pending_reviews || 0;
+        } catch (e) {
+          console.error("Error fetching stats:", e);
+        }
+      }
+      fetchStats();
+      setInterval(fetchStats, 30000); // Refresh every 30 seconds
+
+      // 2. Chat Logic
+      const chatBox = document.getElementById("chatBox");
+      const chatInput = document.getElementById("chatInput");
+
+      function toggleChat() {
+        chatBox.classList.toggle("hidden");
+        chatBox.classList.toggle("flex");
+        if (!chatBox.classList.contains("hidden")) {
+          chatInput.focus();
+        }
+      }
+
+      chatInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendChat();
+      });
+
+      async function sendChat() {
+        const txt = chatInput.value.trim();
+        if (!txt) return;
+
+        const hist = document.getElementById("chatHistory");
+        hist.innerHTML += `<div class="bg-white border border-gray-200 p-3 rounded-xl ml-auto w-4/5 text-right shadow-sm">${txt}</div>`;
+        chatInput.value = "";
+        hist.scrollTop = hist.scrollHeight;
+
+        const loaderId = "loader-" + Date.now();
+        hist.innerHTML += `<div id="${loaderId}" class="text-xs text-gray-400 italic flex items-center gap-2"><i class="fas fa-spinner fa-spin"></i> Thinking...</div>`;
+        hist.scrollTop = hist.scrollHeight;
+
+        try {
+          const res = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: txt }),
+          });
+          const data = await res.json();
+          document.getElementById(loaderId).remove();
+          hist.innerHTML += `<div class="bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-900 p-4 rounded-xl w-4/5 shadow-sm">${data.answer || "I'm having trouble connecting right now."}</div>`;
+        } catch (e) {
+          document.getElementById(loaderId).remove();
+          hist.innerHTML += `<div class="bg-red-50 text-red-700 p-3 rounded-xl w-4/5">Error: Could not get response. Please try again.</div>`;
+        }
+        hist.scrollTop = hist.scrollHeight;
+      }
+
+      // 3. Analysis Modal Logic
+      function openAnalysis(doc) {
+        console.log("Opening analysis for:", doc);
+        
+        // Set title
+        document.getElementById("modalTitle").innerHTML = `<i class="fas fa-chart-line"></i> ${doc.title || "Untitled Document"}`;
+        
+        // Set summary
+        document.getElementById("modalSummary").innerText = doc.summary || "No summary available.";
+        
+        // Set risk score
+        const riskScore = doc.risk_score || 0;
+        document.getElementById("modalRisk").innerText = riskScore + "%";
+        document.getElementById("modalRiskBar").style.width = riskScore + "%";
+        
+        // Set financial value
+        document.getElementById("modalMoney").innerText = doc.formatted_money || "None detected";
+        
+        // Set tags
+        const tagContainer = document.getElementById("modalTags");
+        tagContainer.innerHTML = "";
+        
+        const tags = doc.tag_list || [];
+        if (tags.length > 0) {
+          tags.forEach((tag) => {
+            const span = document.createElement("span");
+            span.className = "px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 text-xs font-bold rounded-full border border-indigo-200";
+            span.innerText = tag;
+            tagContainer.appendChild(span);
+          });
+        } else {
+          tagContainer.innerHTML = '<span class="text-gray-400 text-sm italic">No specific tags extracted.</span>';
+        }
+        
+        // Show modal
+        document.getElementById("analysisModal").classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+        
+        // Mark document as reviewed when analysis is viewed
+        if (doc.id && doc.status === 'Pending') {
+          fetch(`/api/mark-reviewed/${doc.id}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              console.log("Document marked as reviewed");
+              // Update the doc status locally
+              doc.status = 'Reviewed';
+              // Refresh stats if needed
+              fetchStats();
+            }
+          })
+          .catch(error => {
+            console.error("Error marking document as reviewed:", error);
+          });
+        }
+      }
+
+      function closeAnalysisModal() {
+        document.getElementById("analysisModal").classList.add("hidden");
+        document.body.style.overflow = "auto";
+      }
+
+      function closeModalOnBackdrop(event) {
+        if (event.target.id === "analysisModal") {
+          closeAnalysisModal();
+        }
+      }
+
+      // Close modal on ESC key
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeAnalysisModal();
+        }
+      });
+
+      // Custom Notification System
+      function showNotification(title, message, type = 'info') {
+        const container = document.getElementById('notificationContainer');
+        if (!container) return;
+        
+        const notification = document.createElement('div');
+        const bgColor = type === 'error' ? 'bg-red-50 border-red-500' : type === 'success' ? 'bg-green-50 border-green-500' : 'bg-blue-50 border-blue-500';
+        const iconColor = type === 'error' ? 'text-red-500' : type === 'success' ? 'text-green-500' : 'text-blue-500';
+        const textColor = type === 'error' ? 'text-red-700' : type === 'success' ? 'text-green-700' : 'text-blue-700';
+        const icon = type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
+        
+        notification.className = `p-4 rounded-xl border-l-4 ${bgColor} shadow-2xl flex items-start gap-3 animate-slide-in ${textColor} min-w-[300px] max-w-md`;
+        notification.innerHTML = `
+          <div class="flex items-start gap-3 flex-1">
+            <i class="fas ${icon} ${iconColor} text-xl mt-0.5"></i>
+            <div class="flex-1">
+              <div class="font-bold text-sm mb-1">${title}</div>
+              <div class="text-xs ${textColor} opacity-90 whitespace-pre-line">${message}</div>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600 transition">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+          notification.style.animation = 'fadeOut 0.3s ease-out';
+          setTimeout(() => notification.remove(), 300);
+        }, 5000);
+      }
+
+      // Delete Document Function
+      function deleteDocument(docId, docTitle) {
+        if (!confirm(`Are you sure you want to delete "${docTitle}"?\n\nThis action cannot be undone.`)) {
+          return;
+        }
+        
+        // Show loading state
+        const deleteBtn = event.target.closest('button');
+        const originalHTML = deleteBtn.innerHTML;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        deleteBtn.disabled = true;
+        
+        fetch(`/api/delete-document/${docId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showNotification('✅ Document Deleted', `"${docTitle}" has been deleted successfully.`, 'success');
+            // Remove the card from UI
+            const card = deleteBtn.closest('.bg-white.rounded-2xl');
+            card.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+              card.remove();
+              // Refresh stats and page if needed
+              fetchStats();
+              // Reload page after a moment to update counts
+              setTimeout(() => window.location.reload(), 1000);
+            }, 300);
+          } else {
+            showNotification('❌ Delete Failed', data.error || 'Failed to delete document.', 'error');
+            deleteBtn.innerHTML = originalHTML;
+            deleteBtn.disabled = false;
+          }
+        })
+        .catch(error => {
+          console.error('Error deleting document:', error);
+          showNotification('❌ Delete Failed', 'An error occurred while deleting the document.', 'error');
+          deleteBtn.innerHTML = originalHTML;
+          deleteBtn.disabled = false;
+        });
+      }
+
+      // Handle multiple file upload with validation
+      function handleFileUpload(event) {
+        const input = event.target;
+        const files = input.files;
+        
+        if (!files || files.length === 0) {
+          console.log("No files selected");
+          return;
+        }
+        
+        console.log(`Selected ${files.length} file(s)`);
+        
+        // Validate file types
+        const allowedTypes = ['.pdf', '.docx', '.txt'];
+        const invalidFiles = [];
+        
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const fileName = file.name.toLowerCase();
+          const fileExt = fileName.substring(fileName.lastIndexOf('.'));
+          
+          console.log(`File ${i + 1}: ${file.name}, extension: ${fileExt}`);
+          
+          if (!allowedTypes.includes(fileExt)) {
+            invalidFiles.push(file.name);
+          }
+        }
+        
+        // Show validation errors if any
+        if (invalidFiles.length > 0) {
+          showNotification(
+            `❌ Invalid file type(s) detected`,
+            `The following files cannot be uploaded:\n${invalidFiles.join(', ')}\n\nOnly .pdf, .docx, and .txt files are allowed.`,
+            'error'
+          );
+          input.value = ''; // Clear invalid files
+          return;
+        }
+        
+        // Get form and label
+        const form = document.getElementById('uploadForm');
+        const label = form.querySelector('label');
+        
+        // Show loading state (update text only, don't replace entire structure)
+        if (label) {
+          const fileCount = files.length;
+          const icon = label.querySelector('i');
+          const textDiv = label.querySelector('div');
+          if (icon) {
+            icon.className = 'fas fa-spinner fa-spin text-3xl md:text-4xl';
+          }
+          if (textDiv) {
+            textDiv.innerHTML = `
+              <span class="block font-bold text-base md:text-lg">Uploading ${fileCount} file(s)...</span>
+              <span class="block text-xs md:text-sm opacity-90">Please wait</span>
+            `;
+          }
+        }
+        
+        // Ensure form is valid and submit
+        console.log("Submitting form with", files.length, "file(s)");
+        
+        // Use setTimeout to ensure files are attached before submission
+        setTimeout(() => {
+          if (form.checkValidity()) {
+            form.submit();
+          } else {
+            form.reportValidity();
+          }
+        }, 100);
+      }
+    </script>
+  </body>
+</html>
