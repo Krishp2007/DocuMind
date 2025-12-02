@@ -89,7 +89,7 @@ def init_db():
 init_db()
 
 # --- AI CONFIG ---
-API_KEY="AIzaSyC14lPUtQho-9evSHDMoZfWI-NG_IVOCGo"
+API_KEY="YOUR_API_KEY_HERE"
 genai.configure(api_key=API_KEY)
 # Updated to use gemini-2.5-flash (gemini-1.5-flash is deprecated)
 model = genai.GenerativeModel("gemini-2.5-flash")
