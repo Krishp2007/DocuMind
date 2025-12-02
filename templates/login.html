@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DocuMind Access</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .hidden-form { display: none; }
+    </style>
+</head>
+<body class="bg-slate-900 h-screen flex items-center justify-center overflow-hidden relative">
+    
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+        <div class="absolute top-10 left-10 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+        <div class="absolute top-10 right-10 w-72 h-72 bg-indigo-600 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-blue-600 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <div class="z-10 w-full max-w-md p-8 glass rounded-2xl shadow-2xl text-white">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2 tracking-tighter">DocuMind <span class="text-indigo-400">.ai</span></h1>
+            <p class="text-gray-400 text-sm">Enterprise Intelligence Platform</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-3 rounded text-sm font-bold text-center
+                        {% if category=='error' %} bg-red-500/20 text-red-200 border border-red-500/50 
+                        {% else %} bg-green-500/20 text-green-200 border border-green-500/50 {% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="flex bg-gray-800 rounded-lg p-1 mb-6">
+            <button onclick="showLogin()" id="tabLogin" class="flex-1 py-2 text-sm font-bold rounded-md bg-indigo-600 shadow transition-all">Login</button>
+            <button onclick="showRegister()" id="tabRegister" class="flex-1 py-2 text-sm font-bold rounded-md text-gray-400 hover:text-white transition-all">Register</button>
+        </div>
+
+        <form id="loginForm" action="/auth/login" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-400 mb-1">USERNAME</label>
+                <input type="text" name="username" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 mb-1">PASSWORD</label>
+                <input type="password" name="password" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
+            </div>
+            <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition shadow-lg shadow-indigo-900/50">
+                Secure Login <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </form>
+
+        <form id="registerForm" action="/auth/register" method="POST" class="space-y-4 hidden-form">
+            <div>
+                <label class="block text-xs font-bold text-gray-400 mb-1">FULL NAME</label>
+                <input type="text" name="full_name" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 mb-1">USERNAME</label>
+                <input type="text" name="username" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1">PASSWORD</label>
+                    <input type="password" name="password" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1">ROLE</label>
+                    <select name="role" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
+                        <option value="Finance">Finance</option>
+                        <option value="HR">HR</option>
+                        <option value="Legal">Legal</option>
+                        <option value="Auditor">Auditor</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <button class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-lg transition shadow-lg shadow-purple-900/50">
+                Create Account
+            </button>
+        </form>
+
+    </div>
+
+    <script>
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('tabLogin').classList.add('bg-indigo-600', 'text-white');
+            document.getElementById('tabLogin').classList.remove('text-gray-400');
+            document.getElementById('tabRegister').classList.remove('bg-indigo-600', 'text-white');
+            document.getElementById('tabRegister').classList.add('text-gray-400');
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('tabRegister').classList.add('bg-indigo-600', 'text-white');
+            document.getElementById('tabRegister').classList.remove('text-gray-400');
+            document.getElementById('tabLogin').classList.remove('bg-indigo-600', 'text-white');
+            document.getElementById('tabLogin').classList.add('text-gray-400');
+        }
+    </script>
+</body>
+</html>
