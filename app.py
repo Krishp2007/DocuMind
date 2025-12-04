@@ -23,8 +23,8 @@ except ImportError:
     print("⚠️ python-docx not installed.")
 
 # --- CONFIGURATION ---
-resend.api_key = "re_Lxc7NCzq_868MV6REjdK5oxhH1iKv9JiQ"
-API_KEY = "AIzaSyDeOV18QvpAOKG7qP9bl51AYuTInBbrClE"
+resend.api_key = "RESEND_API"
+API_KEY = "API_KEY"
 
 load_dotenv()
 app = Flask(__name__)
