@@ -2,212 +2,183 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>DocuMind Access</title>
+    <title>DocuMind - Secure Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f3f4f6; }
         .hidden-form { display: none; }
-        .animate-blob { animation: blob 7s infinite; }
-        @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
-        }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-slate-900 h-screen flex items-center justify-center overflow-hidden relative">
-    
-    <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-        <div class="absolute top-10 left-10 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-        <div class="absolute top-10 right-10 w-72 h-72 bg-indigo-600 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-        <div class="absolute -bottom-8 left-20 w-72 h-72 bg-blue-600 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
-    </div>
+<body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="z-10 w-full max-w-md p-8 glass rounded-2xl shadow-2xl text-white">
-        
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold mb-2 tracking-tighter">DocuMind <span class="text-indigo-400">.ai</span></h1>
-            <p class="text-gray-400 text-sm">Enterprise Intelligence Platform</p>
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-gray-100 p-8 fade-in relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
+        <div class="text-center mb-8 mt-2">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-indigo-50 rounded-xl text-indigo-600 mb-3">
+                <i class="fas fa-brain text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">DocuMind<span class="text-indigo-600">.ai</span></h1>
+            <p class="text-gray-500 text-sm">Enterprise Intelligence Platform</p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="mb-4 p-3 rounded text-sm font-bold text-center
-                        {% if category=='error' %} bg-red-500/20 text-red-200 border border-red-500/50 
-                        {% else %} bg-green-500/20 text-green-200 border border-green-500/50 {% endif %}">
-                        {{ message }}
+                    <div class="mb-6 p-3 rounded-lg text-sm font-medium flex items-center gap-2
+                        {% if category=='error' %} bg-red-50 text-red-600 border border-red-100 
+                        {% else %} bg-green-50 text-green-600 border border-green-100 {% endif %}">
+                        <i class="fas {% if category=='error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %}"></i>
+                        <span>{{ message }}</span>
                     </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <div class="flex bg-gray-800 rounded-lg p-1 mb-6">
-            <button onclick="switchTab('login')" id="tabLogin" class="flex-1 py-2 text-sm font-bold rounded-md bg-indigo-600 shadow transition-all">Login</button>
-            <button onclick="switchTab('register')" id="tabRegister" class="flex-1 py-2 text-sm font-bold rounded-md text-gray-400 hover:text-white transition-all">Register</button>
+        <div class="flex bg-gray-50 p-1 rounded-xl mb-6">
+            <button onclick="show('login')" id="tabLogin" class="flex-1 py-2 text-sm font-bold rounded-lg bg-white text-gray-900 shadow-sm transition-all">Log In</button>
+            <button onclick="show('register')" id="tabRegister" class="flex-1 py-2 text-sm font-bold rounded-lg text-gray-500 hover:text-gray-700 transition-all">Sign Up</button>
         </div>
 
         <form id="loginForm" action="/auth/login" method="POST" class="space-y-4">
             <div>
-                <label class="block text-xs font-bold text-gray-400 mb-1">USERNAME OR EMAIL</label>
-                <input type="text" name="username" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Username or Email</label>
+                <input type="text" name="username" required class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all">
             </div>
             <div>
-                <label class="block text-xs font-bold text-gray-400 mb-1">PASSWORD</label>
-                <input type="password" name="password" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
-                <div class="text-right mt-1">
-                    <button type="button" onclick="switchTab('forgot')" class="text-xs text-indigo-400 hover:text-indigo-300">Forgot Password?</button>
+                <div class="flex justify-between mb-1">
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Password</label>
+                    <button type="button" onclick="show('forgot')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">Forgot?</button>
                 </div>
+                <input type="password" name="password" required class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all">
             </div>
-            <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition shadow-lg shadow-indigo-900/50">
-                Secure Login <i class="fas fa-arrow-right ml-2"></i>
+            <button class="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-lg shadow-lg transition-all mt-2">
+                Log In
             </button>
         </form>
 
         <form id="registerForm" action="/auth/register" method="POST" class="space-y-4 hidden-form">
-            <div id="regStep1">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1">FULL NAME</label>
-                    <input type="text" name="full_name" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Full Name</label>
+                    <input type="text" name="full_name" required class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-indigo-500">
                 </div>
-                <div class="mt-4">
-                    <label class="block text-xs font-bold text-gray-400 mb-1">USERNAME</label>
-                    <input type="text" name="username" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Username</label>
+                    <input type="text" name="username" required class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-indigo-500">
                 </div>
-                <div class="mt-4">
-                    <label class="block text-xs font-bold text-gray-400 mb-1">EMAIL ADDRESS</label>
-                    <div class="flex gap-2">
-                        <input type="email" id="regEmail" name="email" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
-                        <button type="button" onclick="sendOtp('register')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-lg text-xs font-bold whitespace-nowrap" id="btnSendOtpReg">
-                            Send Code
-                        </button>
-                    </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
+                <div class="flex gap-2">
+                    <input type="email" id="regEmail" name="email" required class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-indigo-500">
+                    <button type="button" id="btnReg" onclick="sendOtp('register', 'regEmail', 'btnReg')" class="bg-gray-100 text-indigo-600 hover:bg-indigo-50 border border-gray-200 px-4 rounded-lg text-xs font-bold whitespace-nowrap transition-colors">Get Code</button>
                 </div>
-                <div class="mt-4">
-                    <label class="block text-xs font-bold text-gray-400 mb-1">PASSWORD</label>
-                    <input type="password" name="password" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
-                </div>
-                <div class="mt-4">
-                    <label class="block text-xs font-bold text-gray-400 mb-1">ROLE</label>
-                    <select name="role" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
-                        <option value="Finance">Finance</option>
-                        <option value="HR">HR</option>
-                        <option value="Legal">Legal</option>
-                        <option value="Viewer">Viewer</option>
-                    </select>
-                </div>
-                
-                <div id="regOtpSection" class="mt-4 hidden text-center bg-gray-800/50 p-4 rounded-lg border border-indigo-500/30">
-                    <label class="block text-xs font-bold text-indigo-400 mb-2">ENTER 6-DIGIT CODE SENT TO EMAIL</label>
-                    <input type="text" name="otp" maxlength="6" placeholder="######" class="w-32 bg-gray-900 border border-indigo-500 rounded-lg p-2 text-center text-xl tracking-widest focus:outline-none">
-                    <button type="submit" class="w-full mt-3 bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded-lg transition">
-                        Verify & Create Account
-                    </button>
-                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Password</label>
+                <input type="password" name="password" required class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-indigo-500">
+            </div>
+
+            <div id="otpSection" class="hidden bg-indigo-50 p-4 rounded-xl border border-indigo-100 text-center fade-in">
+                <p class="text-xs text-indigo-800 font-bold mb-2">VERIFICATION CODE</p>
+                <input type="text" name="otp" maxlength="6" placeholder="000000" class="w-32 text-center text-lg font-mono font-bold tracking-widest bg-white border border-indigo-200 rounded-lg py-2 outline-none focus:ring-2 focus:ring-indigo-300">
+                <button class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg text-sm shadow-md transition-all">Verify & Register</button>
             </div>
         </form>
 
         <form id="forgotForm" action="/auth/reset-password" method="POST" class="space-y-4 hidden-form">
-            <h3 class="text-lg font-bold text-center mb-4">Reset Password</h3>
+            <div class="text-center mb-4">
+                <h3 class="text-lg font-bold text-gray-900">Reset Password</h3>
+                <p class="text-xs text-gray-500">We'll send a code to your email.</p>
+            </div>
+
             <div>
-                <label class="block text-xs font-bold text-gray-400 mb-1">EMAIL ADDRESS</label>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
                 <div class="flex gap-2">
-                    <input type="email" id="forgotEmail" name="email" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
-                    <button type="button" onclick="sendOtp('reset')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-lg text-xs font-bold whitespace-nowrap" id="btnSendOtpReset">
-                        Send Code
-                    </button>
+                    <input type="email" id="forgotEmail" name="email" required class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-indigo-500">
+                    <button type="button" id="btnForgot" onclick="sendOtp('reset', 'forgotEmail', 'btnForgot')" class="bg-gray-100 text-indigo-600 hover:bg-indigo-50 border border-gray-200 px-4 rounded-lg text-xs font-bold whitespace-nowrap transition-colors">Get Code</button>
                 </div>
             </div>
 
-            <div id="forgotFields" class="hidden space-y-4">
-                <div class="text-center bg-gray-800/50 p-4 rounded-lg border border-indigo-500/30">
-                    <label class="block text-xs font-bold text-indigo-400 mb-2">ENTER 6-DIGIT CODE</label>
-                    <input type="text" name="otp" maxlength="6" placeholder="######" class="w-32 bg-gray-900 border border-indigo-500 rounded-lg p-2 text-center text-xl tracking-widest focus:outline-none">
+            <div id="forgotFields" class="hidden space-y-3 fade-in">
+                <div>
+                    <input type="text" name="otp" maxlength="6" placeholder="Enter 6-digit Code" class="w-full text-center bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 font-mono tracking-widest outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1">NEW PASSWORD</label>
-                    <input type="password" name="new_password" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-sm focus:border-indigo-500 focus:outline-none transition">
+                    <input type="password" name="new_password" placeholder="New Password" required class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm outline-none focus:border-indigo-500">
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition shadow-lg">
-                    Reset Password
-                </button>
+                <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg transition-all">Reset Password</button>
             </div>
-            
-            <button type="button" onclick="switchTab('login')" class="w-full text-sm text-gray-400 hover:text-white mt-4">Back to Login</button>
+
+            <div class="text-center pt-2">
+                <button type="button" onclick="show('login')" class="text-xs font-bold text-gray-400 hover:text-gray-600">Back to Login</button>
+            </div>
         </form>
 
     </div>
 
     <script>
-        function switchTab(tab) {
-            // Hide all forms
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('forgotForm').style.display = 'none';
+        function show(tab) {
+            ['loginForm', 'registerForm', 'forgotForm'].forEach(id => document.getElementById(id).style.display = 'none');
             
-            // Reset tabs
-            const tLogin = document.getElementById('tabLogin');
+            const tLog = document.getElementById('tabLogin');
             const tReg = document.getElementById('tabRegister');
             
-            tLogin.className = "flex-1 py-2 text-sm font-bold rounded-md text-gray-400 hover:text-white transition-all";
-            tReg.className = "flex-1 py-2 text-sm font-bold rounded-md text-gray-400 hover:text-white transition-all";
+            tLog.className = "flex-1 py-2 text-sm font-bold rounded-lg text-gray-500 hover:text-gray-700 transition-all";
+            tReg.className = "flex-1 py-2 text-sm font-bold rounded-lg text-gray-500 hover:text-gray-700 transition-all";
 
-            if (tab === 'login') {
+            if(tab === 'login') {
                 document.getElementById('loginForm').style.display = 'block';
-                tLogin.className = "flex-1 py-2 text-sm font-bold rounded-md bg-indigo-600 shadow transition-all text-white";
-            } else if (tab === 'register') {
+                tLog.className = "flex-1 py-2 text-sm font-bold rounded-lg bg-white text-indigo-600 shadow-sm transition-all";
+            } else if(tab === 'register') {
                 document.getElementById('registerForm').style.display = 'block';
-                tReg.className = "flex-1 py-2 text-sm font-bold rounded-md bg-indigo-600 shadow transition-all text-white";
-            } else if (tab === 'forgot') {
+                tReg.className = "flex-1 py-2 text-sm font-bold rounded-lg bg-white text-indigo-600 shadow-sm transition-all";
+            } else if(tab === 'forgot') {
+                // CLEAR FIELDS ON SHOW
+                document.getElementById('forgotEmail').value = '';
+                document.getElementById('forgotFields').classList.add('hidden');
                 document.getElementById('forgotForm').style.display = 'block';
             }
         }
 
-        async function sendOtp(purpose) {
-            const emailId = purpose === 'register' ? 'regEmail' : 'forgotEmail';
-            const btnId = purpose === 'register' ? 'btnSendOtpReg' : 'btnSendOtpReset';
+        async function sendOtp(purpose, emailId, btnId) {
             const email = document.getElementById(emailId).value;
             const btn = document.getElementById(btnId);
-
-            if (!email || !email.includes('@')) {
-                alert("Please enter a valid email address first.");
-                return;
-            }
-
-            // UI Loading state
-            const originalText = btn.innerText;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            if(!email.includes('@')) { alert("Enter valid email"); return; }
+            
+            const oldText = btn.innerText;
+            btn.innerText = "...";
             btn.disabled = true;
-
+            
             try {
-                const response = await fetch('/api/send-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, purpose: purpose })
+                const res = await fetch('/api/send-otp', {
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, purpose})
                 });
-                const data = await response.json();
-
-                if (data.success) {
-                    btn.innerText = "Sent!";
-                    btn.classList.remove('bg-blue-600');
-                    btn.classList.add('bg-green-600');
-                    
-                    if (purpose === 'register') {
-                        document.getElementById('regOtpSection').classList.remove('hidden');
-                    } else {
-                        document.getElementById('forgotFields').classList.remove('hidden');
-                    }
+                const data = await res.json();
+                
+                if(data.success) {
+                    btn.innerText = "Sent ✓";
+                    btn.classList.add('bg-green-100', 'text-green-700');
+                    if(purpose === 'register') document.getElementById('otpSection').classList.remove('hidden');
+                    else document.getElementById('forgotFields').classList.remove('hidden');
                 } else {
-                    alert(data.error || "Failed to send OTP.");
-                    btn.innerText = originalText;
+                    alert(data.error);
+                    btn.innerText = oldText;
                     btn.disabled = false;
                 }
-            } catch (e) {
-                console.error(e);
-                alert("Network error.");
-                btn.innerText = originalText;
+            } catch {
+                alert("Network error");
+                btn.innerText = oldText;
                 btn.disabled = false;
             }
         }
